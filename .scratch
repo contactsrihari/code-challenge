@@ -1,9 +1,6 @@
-dependencies {
-    // Exclude the transitive 'thymeleaf' dependency from 'thymeleaf-spring4'
-    implementation('org.thymeleaf:thymeleaf-spring4:3.0.14.RELEASE') {
-        exclude group: 'org.thymeleaf', module: 'thymeleaf'
+configurations {
+    resolvableTestImplementation {
+        canBeResolved = true
+        extendsFrom testImplementation
     }
-
-    // Manually include the desired version of thymeleaf
-    implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
 }
