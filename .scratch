@@ -1,6 +1,1 @@
-configurations {
-    resolvableTestImplementation {
-        canBeResolved = true
-        extendsFrom testImplementation
-    }
-}
+sed -n 's/^|[^|]*| \([^|]*\) .*Time taken \[\([^]]*\)\].*/\1 \2/p'
