@@ -1,3 +1,28 @@
 | sed -n 's/.*Port={Integer : \([0-9]*\)} Host={String: \([^}]*\)}.*/Port=\1 Host=\2/p'
 sed -n 's/^|[^|]*| \([^|]*\) .*Time taken \[\([^]]*\)\].*/\1 \2/p'
 citivelocity.com/cv2/go/CONTENT_PROVIDER_DASHBOARD
+
+
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
+public class AddSecondsToTime {
+    public static void main(String[] args) {
+        // Get current system time
+        Instant now = Instant.now();
+
+        // Add n seconds (e.g., 30 seconds)
+        int secondsToAdd = 30;
+        Instant futureTime = now.plusSeconds(secondsToAdd);
+
+        // Format the time in UTC
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                                       .withZone(ZoneOffset.UTC);
+
+        // Print the formatted time
+        String formattedTime = formatter.format(futureTime);
+        System.out.println("Time after " + secondsToAdd + " seconds in UTC: " + formattedTime);
+    }
+}
