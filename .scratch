@@ -26,3 +26,15 @@ public class AddSecondsToTime {
         System.out.println("Time after " + secondsToAdd + " seconds in UTC: " + formattedTime);
     }
 }
+
+        DateTime now = DateTime.now().withZoneUTC();
+
+        // Add 60 seconds
+        int secondsToAdd = 60;
+        DateTime futureTime = now.plusSeconds(secondsToAdd);
+
+        // Define the formatter
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+        // Format the future time
+        String formattedTime = formatter.print(futureTime);
