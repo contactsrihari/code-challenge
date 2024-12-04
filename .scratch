@@ -38,3 +38,7 @@ public class AddSecondsToTime {
 
         // Format the future time
         String formattedTime = formatter.print(futureTime);
+
+<property name="g10CurrencyList">
+    <value>#{'${g10.currency.list}'.split(',')}</value>
+</property>
