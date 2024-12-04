@@ -42,3 +42,5 @@ public class AddSecondsToTime {
 <property name="g10CurrencyList">
     <value>#{'${g10.currency.list}'.split(',')}</value>
 </property>
+
+8a96131ce8d2ed5b6388ea1 98b653df7
