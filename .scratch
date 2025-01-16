@@ -1,48 +1,56 @@
-150699-CEPEMU4-31808DH52-1D_
 
 | sed -n 's/.*Port={Integer : \([0-9]*\)} Host={String: \([^}]*\)}.*/Port=\1 Host=\2/p'
 sed -n 's/^|[^|]*| \([^|]*\) .*Time taken \[\([^]]*\)\].*/\1 \2/p'
-citivelocity.com/cv2/go/CONTENT_PROVIDER_DASHBOARD
 
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+import java.io.InputStream;
+import java.util.Random;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
+public class ConfigLoader {
 
-public class AddSecondsToTime {
-    public static void main(String[] args) {
-        // Get current system time
-        Instant now = Instant.now();
+    public static ConnectivityConfig fromInputStream(InputStream inputStream) throws Exception {
+        // Create JAXBContext
+        JAXBContext jaxbContext = JAXBContext.newInstance(ConnectivityConfig.class);
 
-        // Add n seconds (e.g., 30 seconds)
-        int secondsToAdd = 30;
-        Instant futureTime = now.plusSeconds(secondsToAdd);
+        // Secure the JAXB Unmarshaller
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");  // Prevent XXE attacks
+        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");  // Prevent XXE attacks
 
-        // Format the time in UTC
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                                                       .withZone(ZoneOffset.UTC);
+        // Configure SAXParserFactory
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setValidating(true); // Enable validation for DTD
 
-        // Print the formatted time
-        String formattedTime = formatter.format(futureTime);
-        System.out.println("Time after " + secondsToAdd + " seconds in UTC: " + formattedTime);
+        // Create XMLReader
+        XMLReader xmlReader = factory.newSAXParser().getXMLReader();
+        xmlReader.setErrorHandler(new DefaultHandler()); // Set custom error handler for validation
+
+        // Wrap InputStream in SAXSource
+        InputSource inputSource = new InputSource(inputStream);
+        SAXSource saxSource = new SAXSource(xmlReader, inputSource);
+
+        // Unmarshal using the SAXSource
+        ConnectivityConfig config = (ConnectivityConfig) unmarshaller.unmarshal(saxSource);
+
+        // Default values if missing
+        if (config.getFIXSessionConfig().getQuickFIXDictionaryPath() == null) {
+            config.getFIXSessionConfig().setQuickFIXDictionaryPath("resources/quickfix/FIX44.xml");
+        }
+        if (config.getTransportConfig().getClientId() == null || config.getTransportConfig().getClientId().isEmpty()) {
+            config.getTransportConfig().setClientId("RatesFIXAPI_" + System.getProperty("user.name") + "_" + new Random().nextInt(100));
+        }
+
+        return config;
     }
 }
 
-        DateTime now = DateTime.now().withZoneUTC();
-
-        // Add 60 seconds
-        int secondsToAdd = 60;
-        DateTime futureTime = now.plusSeconds(secondsToAdd);
-
-        // Define the formatter
-        DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
-
-        // Format the future time
-        String formattedTime = formatter.print(futureTime);
-
-<property name="g10CurrencyList">
-    <value>#{'${g10.currency.list}'.split(',')}</value>
-</property>
-
-8a96131ce8d2ed5b6388ea1 98b653df7
