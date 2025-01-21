@@ -1,3 +1,72 @@
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.sax.SAXSource;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.DefaultHandler;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Random;
+
+public class ConfigLoader {
+
+    public static ConnectivityConfig fromInputStream(InputStream inputStream) throws Exception {
+        // Define the most generic DTD as a string
+        String genericDTD = """
+            <!ELEMENT root ANY>
+            <!ATTLIST root id ID #IMPLIED>
+            <!ELEMENT element ANY>
+        """;
+
+        // Read the original XML content from the input stream
+        String xmlContent = new String(inputStream.readAllBytes()); // Convert InputStream to String
+
+        // Prepend the generic DTD as a DOCTYPE declaration to the XML content
+        String xmlWithDoctype = """
+            <!DOCTYPE root [
+        """ + genericDTD + "]>" + xmlContent;
+
+        // Wrap the modified XML content with a DOCTYPE into a new InputStream
+        InputStream xmlStream = new ByteArrayInputStream(xmlWithDoctype.getBytes());
+
+        // Create JAXBContext
+        JAXBContext jaxbContext = JAXBContext.newInstance(ConnectivityConfig.class);
+
+        // Secure the JAXB Unmarshaller
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");  // Prevent XXE attacks
+        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");  // Prevent XXE attacks
+
+        // Configure SAXParserFactory
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setValidating(true); // Enable validation for DTD
+
+        // Create XMLReader
+        XMLReader xmlReader = factory.newSAXParser().getXMLReader();
+        xmlReader.setErrorHandler(new DefaultHandler()); // Set custom error handler for validation
+
+        // Wrap the XML stream in a SAXSource
+        InputSource inputSource = new InputSource(xmlStream);
+        SAXSource saxSource = new SAXSource(xmlReader, inputSource);
+
+        // Unmarshal using the SAXSource
+        ConnectivityConfig config = (ConnectivityConfig) unmarshaller.unmarshal(saxSource);
+
+        // Default values if missing
+        if (config.getFIXSessionConfig().getQuickFIXDictionaryPath() == null) {
+            config.getFIXSessionConfig().setQuickFIXDictionaryPath("resources/quickfix/FIX44.xml");
+        }
+        if (config.getTransportConfig().getClientId() == null || config.getTransportConfig().getClientId().isEmpty()) {
+            config.getTransportConfig().setClientId("RatesFIXAPI_" + System.getProperty("user.name") + "_" + new Random().nextInt(100));
+        }
+
+        return config;
+    }
+}
+
 
 | sed -n 's/.*Port={Integer : \([0-9]*\)} Host={String: \([^}]*\)}.*/Port=\1 Host=\2/p'
 sed -n 's/^|[^|]*| \([^|]*\) .*Time taken \[\([^]]*\)\].*/\1 \2/p'
