@@ -26,26 +26,26 @@ awk -F '#' '
     count = $4;
 
     # Initialize data structures for each unique formatted datetime and key combination
-    if (!seen[formatted_datetime,key]) {
-        seen[formatted_datetime,key] = 1;
-        first_total[formatted_datetime,key] = total;  # Track first total for the window
-        last_total[formatted_datetime,key] = total;   # Track last total for the window
-        count_sum[formatted_datetime,key] = 0;
-        max_count[formatted_datetime,key] = count;
-        num_records[formatted_datetime,key] = 0;
+    if (!seen[formatted_datetime, key]) {
+        seen[formatted_datetime, key] = 1;
+        first_total[formatted_datetime, key] = total;  # Track first total for the window
+        last_total[formatted_datetime, key] = total;   # Track last total for the window
+        count_sum[formatted_datetime, key] = 0;
+        max_count[formatted_datetime, key] = count;
+        num_records[formatted_datetime, key] = 0;
     }
 
     # Update last total for the window
-    last_total[formatted_datetime,key] = total;
+    last_total[formatted_datetime, key] = total;
 
     # Update max values for count
-    if (count > max_count[formatted_datetime,key]) {
-        max_count[formatted_datetime,key] = count;
+    if (count > max_count[formatted_datetime, key]) {
+        max_count[formatted_datetime, key] = count;
     }
 
     # Accumulate sum of count for averaging later
-    count_sum[formatted_datetime,key] += count;
-    num_records[formatted_datetime,key]++;
+    count_sum[formatted_datetime, key] += count;
+    num_records[formatted_datetime, key]++;
 }
 END {
     # Print header with appropriate column names
@@ -55,13 +55,13 @@ END {
     for (datetime in first_total) {
         for (key in first_total[datetime]) {
             # Calculate the processed total (difference between first and last total)
-            processed = last_total[datetime,key] - first_total[datetime,key];
+            processed = last_total[datetime, key] - first_total[datetime, key];
             
             # Calculate the average count for the window (now called Pending Messages)
-            pending_messages = count_sum[datetime,key] / num_records[datetime,key];
+            pending_messages = count_sum[datetime, key] / num_records[datetime, key];
             
             # Print the results for each datetime and key with padding
-            printf "%-20s %-15s %-15.2f %-15.2f %-15.2f\n", datetime, key, processed, pending_messages, last_total[datetime,key] - first_total[datetime,key];
+            printf "%-20s %-15s %-15.2f %-15.2f %-15.2f\n", datetime, key, processed, pending_messages, last_total[datetime, key] - first_total[datetime, key];
         }
     }
 }
