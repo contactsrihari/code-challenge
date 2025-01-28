@@ -1,19 +1,21 @@
 #!/bin/bash
 
 awk -F '#' '
+# Extract datetime, key, total, and count from the log line
 {
-    # Extract datetime, key, total, and count from the log line
-    datetime = substr($1, 1, 10) " " substr($1, 12, 5);  # Format datetime as YYYYMMDD HH:MM
-    
+    # Format datetime as YYYYMMDD HH:MM and split into date and time parts
+    datetime = substr($1, 1, 10) " " substr($1, 12, 5);
+
     # Zero pad hour, minute, and second to ensure two digits
     split(datetime, dt_parts, " ");
     split(dt_parts[2], time_parts, ":");
 
+    # Extract hour, minute, and second and pad them if necessary
     hour = time_parts[1];
     minute = time_parts[2];
     second = time_parts[3];
 
-    # Pad hour, minute, and second if they are single digits
+    # If hour, minute, or second has only one digit, prepend "0"
     hour = (length(hour) == 1) ? "0" hour : hour;
     minute = (length(minute) == 1) ? "0" minute : minute;
     second = (length(second) == 1) ? "0" second : second;
@@ -21,6 +23,7 @@ awk -F '#' '
     # Rebuild the datetime with padded hour, minute, and second
     formatted_datetime = dt_parts[1] " " hour ":" minute ":" second;
 
+    # Store the log information
     key = $2;
     total = $3;
     count = $4;
@@ -33,8 +36,12 @@ awk -F '#' '
         max_total[formatted_datetime] = total;
         max_count[formatted_datetime] = count;
         num_records[formatted_datetime] = 0;
-        initial_total[formatted_datetime] = total;  # Track initial total
     }
+
+    # Accumulate total and count for averaging later
+    total_sum[formatted_datetime] += total;
+    count_sum[formatted_datetime] += count;
+    num_records[formatted_datetime]++;
 
     # Update max values for total and count
     if (total > max_total[formatted_datetime]) {
@@ -43,28 +50,16 @@ awk -F '#' '
     if (count > max_count[formatted_datetime]) {
         max_count[formatted_datetime] = count;
     }
-
-    # Accumulate sum of count for averaging later
-    count_sum[formatted_datetime] += count;
-    num_records[formatted_datetime]++;
-
-    # Store the last total as final total for the window
-    final_total[formatted_datetime] = total;
 }
 END {
-    # Print header with appropriate column names
-    printf "%-20s %-15s %-15s %-15s %-15s\n", "Datetime", "Processed", "Avg Count", "Max Total", "Max Count";
+    # Print the header with column names
+    printf "%-20s %-15s %-15s %-15s %-15s\n", "Datetime", "Avg Total", "Avg Count", "Max Total", "Max Count";
 
-    # Print results for each minute with calculated processed value
+    # Print the results for each datetime, with the calculated averages and max values
     for (datetime in total_sum) {
-        # Calculate the processed total (difference between initial and final total)
-        processed = final_total[datetime] - initial_total[datetime];
-        
-        # Calculate the average count for the window
+        avg_total = total_sum[datetime] / num_records[datetime];
         avg_count = count_sum[datetime] / num_records[datetime];
-        
-        # Print the results for each datetime with padding
-        printf "%-20s %-15.2f %-15.2f %-15.2f %-15d\n", datetime, processed, avg_count, max_total[datetime], max_count[datetime];
+        printf "%-20s %-15.2f %-15.2f %-15.2f %-15d\n", datetime, avg_total, avg_count, max_total[datetime], max_count[datetime];
     }
 }
 ' input.log
