@@ -1,69 +1,45 @@
-#!/bin/bash
+#!/usr/bin/awk -f
 
-awk -F '#' '
+BEGIN {
+    FS = "#";  # Set field separator to '#'
+    OFS = "\t"; # Set output field separator to tab
+    print "Datetime", "Key", "Processed", "Pending Messages", "Total Processed";
+}
+
 {
-    # Extract datetime, key, total, and count from the log line
-    datetime = substr($1, 1, 10) " " substr($1, 12, 5);  # Format datetime as YYYYMMDD HH:MM
-    
-    # Zero pad hour, minute, and second to ensure two digits
-    split(datetime, dt_parts, " ");
-    split(dt_parts[2], time_parts, ":");
-
-    hour = time_parts[1];
-    minute = time_parts[2];
-    second = time_parts[3];
-
-    # Pad hour, minute, and second if they are single digits
-    hour = (length(hour) == 1) ? "0" hour : hour;
-    minute = (length(minute) == 1) ? "0" minute : minute;
-    second = (length(second) == 1) ? "0" second : second;
-
-    # Rebuild the datetime with padded hour, minute, and second
-    formatted_datetime = dt_parts[1] " " hour ":" minute ":" second;
-
+    # Extract datetime up to the minute (remove seconds and milliseconds)
+    datetime_minute = substr($1, 1, 12);
     key = $2;
-    total = $3;
-    count = $4;
+    running_total = $3;
+    pending_messages = $4;
 
-    # Initialize data structures for each unique formatted datetime and key combination
-    if (!(formatted_datetime in first_total && key in first_total[formatted_datetime])) {
-        first_total[formatted_datetime, key] = total;  # Track first total for the window
-        last_total[formatted_datetime, key] = total;   # Track last total for the window
-        count_sum[formatted_datetime, key] = 0;
-        num_records[formatted_datetime, key] = 0;
+    # Initialize arrays for the first occurrence of a key in a minute
+    if (!(datetime_minute in initial_running_total)) {
+        initial_running_total[datetime_minute, key] = running_total;
+        total_pending[datetime_minute, key] = 0;
+        count[datetime_minute, key] = 0;
     }
 
-    # Update last total for the window
-    last_total[formatted_datetime, key] = total;
-
-    # Update max values for count
-    if (count > max_count[formatted_datetime, key]) {
-        max_count[formatted_datetime, key] = count;
-    }
-
-    # Accumulate sum of count for averaging later
-    count_sum[formatted_datetime, key] += count;
-    num_records[formatted_datetime, key]++;
+    # Store the latest running total and accumulate pending messages
+    final_running_total[datetime_minute, key] = running_total;
+    total_pending[datetime_minute, key] += pending_messages;
+    count[datetime_minute, key] += 1;
 }
+
 END {
-    # Print header with appropriate column names
-    printf "%-20s %-15s %-15s %-15s %-15s\n", "Datetime", "Key", "Processed", "Pending Messages", "Total Processed";
+    # Iterate through the collected data and calculate the required metrics
+    for (key_minute in initial_running_total) {
+        split(key_minute, keys, SUBSEP);  # Split the composite key into datetime and key
+        datetime_minute = keys[1];
+        key = keys[2];
 
-    # Print results for each minute with calculated processed value
-    for (datetime_key in first_total) {
-        split(datetime_key, parts, SUBSEP);
-        formatted_datetime = parts[1];
-        key = parts[2];
+        # Calculate processed value
+        processed = final_running_total[datetime_minute, key] - initial_running_total[datetime_minute, key];
 
-        # Calculate the processed total (difference between first and last total)
-        processed = last_total[formatted_datetime, key] - first_total[formatted_datetime, key];
+        # Calculate average pending messages
+        avg_pending = total_pending[datetime_minute, key] / count[datetime_minute, key];
 
-        # Calculate the average count for the window (now called Pending Messages)
-        pending_messages = count_sum[formatted_datetime, key] / num_records[formatted_datetime, key];
-
-        # Print the results for each datetime and key with padding
-        printf "%-20s %-15s %-15.2f %-15.2f %-15.2f\n", formatted_datetime, key, processed, pending_messages, processed;
+        # Print the results
+        print datetime_minute, key, processed, avg_pending, processed;
     }
 }
-' input.log
-
