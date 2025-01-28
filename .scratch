@@ -10,11 +10,11 @@ BEGIN {
     # Extract datetime up to the minute (remove seconds and milliseconds)
     datetime_minute = substr($1, 1, 12);
     key = $2;
-    running_total = $3;
-    pending_messages = $4;
+    running_total = $3 + 0;  # Ensure numeric conversion
+    pending_messages = $4 + 0;  # Ensure numeric conversion
 
     # Initialize arrays for the first occurrence of a key in a minute
-    if (!(datetime_minute in initial_running_total)) {
+    if (!(datetime_minute in initial_running_total) || !(key in initial_running_total[datetime_minute])) {
         initial_running_total[datetime_minute, key] = running_total;
         total_pending[datetime_minute, key] = 0;
         count[datetime_minute, key] = 0;
