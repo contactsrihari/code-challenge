@@ -1,4 +1,48 @@
 
+#!/bin/bash
+
+awk -F '#' '
+{
+    # Extract datetime, key, total, and count from the log line
+    datetime = substr($1, 1, 10) " " substr($1, 12, 5);  # Format datetime as YYYYMMDD HH:MM
+    key = $2;
+    total = $3;
+    count = $4;
+
+    # Initialize the data structures if they don't exist for the given minute
+    if (!seen[datetime]) {
+        seen[datetime] = 1;
+        total_sum[datetime] = 0;
+        count_sum[datetime] = 0;
+        max_total[datetime] = total;
+        max_count[datetime] = count;
+        num_records[datetime] = 0;
+    }
+
+    # Accumulate values
+    total_sum[datetime] += total;
+    count_sum[datetime] += count;
+    num_records[datetime]++;
+
+    # Update max values
+    if (total > max_total[datetime]) {
+        max_total[datetime] = total;
+    }
+    if (count > max_count[datetime]) {
+        max_count[datetime] = count;
+    }
+}
+END {
+    # Output the results for each minute
+    for (datetime in total_sum) {
+        avg_total = total_sum[datetime] / num_records[datetime];
+        avg_count = count_sum[datetime] / num_records[datetime];
+        print datetime, "Avg Total:", avg_total, "Avg Count:", avg_count, "Max Total:", max_total[datetime], "Max Count:", max_count[datetime];
+    }
+}
+' input.log
+
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
