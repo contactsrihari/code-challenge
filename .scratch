@@ -1,21 +1,19 @@
 #!/bin/bash
 
 awk -F '#' '
-# Extract datetime, key, total, and count from the log line
 {
-    # Format datetime as YYYYMMDD HH:MM and split into date and time parts
-    datetime = substr($1, 1, 10) " " substr($1, 12, 5);
-
+    # Extract datetime, key, total, and count from the log line
+    datetime = substr($1, 1, 10) " " substr($1, 12, 5);  # Format datetime as YYYYMMDD HH:MM
+    
     # Zero pad hour, minute, and second to ensure two digits
     split(datetime, dt_parts, " ");
     split(dt_parts[2], time_parts, ":");
 
-    # Extract hour, minute, and second and pad them if necessary
     hour = time_parts[1];
     minute = time_parts[2];
     second = time_parts[3];
 
-    # If hour, minute, or second has only one digit, prepend "0"
+    # Pad hour, minute, and second if they are single digits
     hour = (length(hour) == 1) ? "0" hour : hour;
     minute = (length(minute) == 1) ? "0" minute : minute;
     second = (length(second) == 1) ? "0" second : second;
@@ -23,43 +21,48 @@ awk -F '#' '
     # Rebuild the datetime with padded hour, minute, and second
     formatted_datetime = dt_parts[1] " " hour ":" minute ":" second;
 
-    # Store the log information
     key = $2;
     total = $3;
     count = $4;
 
-    # Initialize data structures for each unique formatted datetime
-    if (!seen[formatted_datetime]) {
-        seen[formatted_datetime] = 1;
-        total_sum[formatted_datetime] = 0;
-        count_sum[formatted_datetime] = 0;
-        max_total[formatted_datetime] = total;
-        max_count[formatted_datetime] = count;
-        num_records[formatted_datetime] = 0;
+    # Initialize data structures for each unique formatted datetime and key combination
+    if (!seen[formatted_datetime,key]) {
+        seen[formatted_datetime,key] = 1;
+        first_total[formatted_datetime,key] = total;  # Track first total for the window
+        last_total[formatted_datetime,key] = total;   # Track last total for the window
+        count_sum[formatted_datetime,key] = 0;
+        max_count[formatted_datetime,key] = count;
+        num_records[formatted_datetime,key] = 0;
     }
 
-    # Accumulate total and count for averaging later
-    total_sum[formatted_datetime] += total;
-    count_sum[formatted_datetime] += count;
-    num_records[formatted_datetime]++;
+    # Update last total for the window
+    last_total[formatted_datetime,key] = total;
 
-    # Update max values for total and count
-    if (total > max_total[formatted_datetime]) {
-        max_total[formatted_datetime] = total;
+    # Update max values for count
+    if (count > max_count[formatted_datetime,key]) {
+        max_count[formatted_datetime,key] = count;
     }
-    if (count > max_count[formatted_datetime]) {
-        max_count[formatted_datetime] = count;
-    }
+
+    # Accumulate sum of count for averaging later
+    count_sum[formatted_datetime,key] += count;
+    num_records[formatted_datetime,key]++;
 }
 END {
-    # Print the header with column names
-    printf "%-20s %-15s %-15s %-15s %-15s\n", "Datetime", "Avg Total", "Avg Count", "Max Total", "Max Count";
+    # Print header with appropriate column names
+    printf "%-20s %-15s %-15s %-15s %-15s\n", "Datetime", "Key", "Processed", "Pending Messages", "Total Processed";
 
-    # Print the results for each datetime, with the calculated averages and max values
-    for (datetime in total_sum) {
-        avg_total = total_sum[datetime] / num_records[datetime];
-        avg_count = count_sum[datetime] / num_records[datetime];
-        printf "%-20s %-15.2f %-15.2f %-15.2f %-15d\n", datetime, avg_total, avg_count, max_total[datetime], max_count[datetime];
+    # Print results for each minute with calculated processed value
+    for (datetime in first_total) {
+        for (key in first_total[datetime]) {
+            # Calculate the processed total (difference between first and last total)
+            processed = last_total[datetime,key] - first_total[datetime,key];
+            
+            # Calculate the average count for the window (now called Pending Messages)
+            pending_messages = count_sum[datetime,key] / num_records[datetime,key];
+            
+            # Print the results for each datetime and key with padding
+            printf "%-20s %-15s %-15.2f %-15.2f %-15.2f\n", datetime, key, processed, pending_messages, last_total[datetime,key] - first_total[datetime,key];
+        }
     }
 }
 ' input.log
