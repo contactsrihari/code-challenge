@@ -4,184 +4,68 @@ awk -F '#' '
 {
     # Extract datetime, key, total, and count from the log line
     datetime = substr($1, 1, 10) " " substr($1, 12, 5);  # Format datetime as YYYYMMDD HH:MM
+    
+    # Zero pad hour, minute, and second to ensure two digits
+    split(datetime, dt_parts, " ");
+    split(dt_parts[2], time_parts, ":");
+
+    hour = time_parts[1];
+    minute = time_parts[2];
+    second = time_parts[3];
+
+    # Pad hour, minute, and second if they are single digits
+    hour = (length(hour) == 1) ? "0" hour : hour;
+    minute = (length(minute) == 1) ? "0" minute : minute;
+    second = (length(second) == 1) ? "0" second : second;
+
+    # Rebuild the datetime with padded hour, minute, and second
+    formatted_datetime = dt_parts[1] " " hour ":" minute ":" second;
+
     key = $2;
     total = $3;
     count = $4;
 
-    # Initialize the data structures if they don't exist for the given minute
-    if (!seen[datetime]) {
-        seen[datetime] = 1;
-        total_sum[datetime] = 0;
-        count_sum[datetime] = 0;
-        max_total[datetime] = total;
-        max_count[datetime] = count;
-        num_records[datetime] = 0;
+    # Initialize data structures for each unique formatted datetime
+    if (!seen[formatted_datetime]) {
+        seen[formatted_datetime] = 1;
+        total_sum[formatted_datetime] = 0;
+        count_sum[formatted_datetime] = 0;
+        max_total[formatted_datetime] = total;
+        max_count[formatted_datetime] = count;
+        num_records[formatted_datetime] = 0;
+        initial_total[formatted_datetime] = total;  # Track initial total
     }
 
-    # Accumulate values
-    total_sum[datetime] += total;
-    count_sum[datetime] += count;
-    num_records[datetime]++;
+    # Update max values for total and count
+    if (total > max_total[formatted_datetime]) {
+        max_total[formatted_datetime] = total;
+    }
+    if (count > max_count[formatted_datetime]) {
+        max_count[formatted_datetime] = count;
+    }
 
-    # Update max values
-    if (total > max_total[datetime]) {
-        max_total[datetime] = total;
-    }
-    if (count > max_count[datetime]) {
-        max_count[datetime] = count;
-    }
+    # Accumulate sum of count for averaging later
+    count_sum[formatted_datetime] += count;
+    num_records[formatted_datetime]++;
+
+    # Store the last total as final total for the window
+    final_total[formatted_datetime] = total;
 }
 END {
-    # Print header
-    printf "%-20s %-15s %-15s %-15s %-15s\n", "Datetime", "Avg Total", "Avg Count", "Max Total", "Max Count";
+    # Print header with appropriate column names
+    printf "%-20s %-15s %-15s %-15s %-15s\n", "Datetime", "Processed", "Avg Count", "Max Total", "Max Count";
 
-    # Output the results for each minute with padding
+    # Print results for each minute with calculated processed value
     for (datetime in total_sum) {
-        avg_total = total_sum[datetime] / num_records[datetime];
+        # Calculate the processed total (difference between initial and final total)
+        processed = final_total[datetime] - initial_total[datetime];
+        
+        # Calculate the average count for the window
         avg_count = count_sum[datetime] / num_records[datetime];
-        printf "%-20s %-15.2f %-15.2f %-15.2f %-15d\n", datetime, avg_total, avg_count, max_total[datetime], max_count[datetime];
+        
+        # Print the results for each datetime with padding
+        printf "%-20s %-15.2f %-15.2f %-15.2f %-15d\n", datetime, processed, avg_count, max_total[datetime], max_count[datetime];
     }
 }
 ' input.log
-
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
-
-public class InputStreamToStringExample {
-    public static String convertInputStreamToString(InputStream inputStream) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            return reader.lines().collect(Collectors.joining("\n"));
-        } catch (Exception e) {
-            throw new RuntimeException("Error converting InputStream to String", e);
-        }
-    }
-}
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.sax.SAXSource;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.Random;
-
-public class ConfigLoader {
-
-    public static ConnectivityConfig fromInputStream(InputStream inputStream) throws Exception {
-        // Define the most generic DTD as a string
-        String genericDTD = """
-            <!ELEMENT root ANY>
-            <!ATTLIST root id ID #IMPLIED>
-            <!ELEMENT element ANY>
-        """;
-
-        // Read the original XML content from the input stream
-        String xmlContent = new String(inputStream.readAllBytes()); // Convert InputStream to String
-
-        // Prepend the generic DTD as a DOCTYPE declaration to the XML content
-        String xmlWithDoctype = """
-            <!DOCTYPE root [
-        """ + genericDTD + "]>" + xmlContent;
-
-        // Wrap the modified XML content with a DOCTYPE into a new InputStream
-        InputStream xmlStream = new ByteArrayInputStream(xmlWithDoctype.getBytes());
-
-        // Create JAXBContext
-        JAXBContext jaxbContext = JAXBContext.newInstance(ConnectivityConfig.class);
-
-        // Secure the JAXB Unmarshaller
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");  // Prevent XXE attacks
-        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");  // Prevent XXE attacks
-
-        // Configure SAXParserFactory
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setNamespaceAware(true);
-        factory.setValidating(true); // Enable validation for DTD
-
-        // Create XMLReader
-        XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-        xmlReader.setErrorHandler(new DefaultHandler()); // Set custom error handler for validation
-
-        // Wrap the XML stream in a SAXSource
-        InputSource inputSource = new InputSource(xmlStream);
-        SAXSource saxSource = new SAXSource(xmlReader, inputSource);
-
-        // Unmarshal using the SAXSource
-        ConnectivityConfig config = (ConnectivityConfig) unmarshaller.unmarshal(saxSource);
-
-        // Default values if missing
-        if (config.getFIXSessionConfig().getQuickFIXDictionaryPath() == null) {
-            config.getFIXSessionConfig().setQuickFIXDictionaryPath("resources/quickfix/FIX44.xml");
-        }
-        if (config.getTransportConfig().getClientId() == null || config.getTransportConfig().getClientId().isEmpty()) {
-            config.getTransportConfig().setClientId("RatesFIXAPI_" + System.getProperty("user.name") + "_" + new Random().nextInt(100));
-        }
-
-        return config;
-    }
-}
-
-
-| sed -n 's/.*Port={Integer : \([0-9]*\)} Host={String: \([^}]*\)}.*/Port=\1 Host=\2/p'
-sed -n 's/^|[^|]*| \([^|]*\) .*Time taken \[\([^]]*\)\].*/\1 \2/p'
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.sax.SAXSource;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.DefaultHandler;
-import java.io.InputStream;
-import java.util.Random;
-
-public class ConfigLoader {
-
-    public static ConnectivityConfig fromInputStream(InputStream inputStream) throws Exception {
-        // Create JAXBContext
-        JAXBContext jaxbContext = JAXBContext.newInstance(ConnectivityConfig.class);
-
-        // Secure the JAXB Unmarshaller
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");  // Prevent XXE attacks
-        unmarshaller.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");  // Prevent XXE attacks
-
-        // Configure SAXParserFactory
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        factory.setNamespaceAware(true);
-        factory.setValidating(true); // Enable validation for DTD
-
-        // Create XMLReader
-        XMLReader xmlReader = factory.newSAXParser().getXMLReader();
-        xmlReader.setErrorHandler(new DefaultHandler()); // Set custom error handler for validation
-
-        // Wrap InputStream in SAXSource
-        InputSource inputSource = new InputSource(inputStream);
-        SAXSource saxSource = new SAXSource(xmlReader, inputSource);
-
-        // Unmarshal using the SAXSource
-        ConnectivityConfig config = (ConnectivityConfig) unmarshaller.unmarshal(saxSource);
-
-        // Default values if missing
-        if (config.getFIXSessionConfig().getQuickFIXDictionaryPath() == null) {
-            config.getFIXSessionConfig().setQuickFIXDictionaryPath("resources/quickfix/FIX44.xml");
-        }
-        if (config.getTransportConfig().getClientId() == null || config.getTransportConfig().getClientId().isEmpty()) {
-            config.getTransportConfig().setClientId("RatesFIXAPI_" + System.getProperty("user.name") + "_" + new Random().nextInt(100));
-        }
-
-        return config;
-    }
-}
 
