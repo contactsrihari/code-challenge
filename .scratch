@@ -1,45 +1,42 @@
-#!/usr/bin/awk -f
+#!/bin/bash
 
-BEGIN {
-    FS = "#";  # Set field separator to '#'
-    OFS = "\t"; # Set output field separator to tab
-    print "Datetime", "Key", "Processed", "Pending Messages", "Total Processed";
-}
-
+awk -F '#' '
 {
-    # Extract datetime up to the minute (remove seconds and milliseconds)
-    datetime_minute = substr($1, 1, 12);
-    key = $2;
-    running_total = $3 + 0;  # Ensure numeric conversion
-    pending_messages = $4 + 0;  # Ensure numeric conversion
+    # Extract datetime up to minute, key, total, and count
+    datetime = substr($1, 1, 16);  # Extract datetime up to minute
+    key = $2;                      # Extract the key
+    total = $3;                    # Extract the total
+    count = $4;                    # Extract the count
 
-    # Initialize arrays for the first occurrence of a key in a minute
-    if (!(datetime_minute in initial_running_total) || !(key in initial_running_total[datetime_minute])) {
-        initial_running_total[datetime_minute, key] = running_total;
-        total_pending[datetime_minute, key] = 0;
-        count[datetime_minute, key] = 0;
+    # Initialize first total and first count for each datetime, key combination
+    if (!(datetime, key) in first_total) {
+        first_total[datetime, key] = total;
     }
 
-    # Store the latest running total and accumulate pending messages
-    final_running_total[datetime_minute, key] = running_total;
-    total_pending[datetime_minute, key] += pending_messages;
-    count[datetime_minute, key] += 1;
+    # Update last total and accumulate count for the same datetime, key
+    last_total[datetime, key] = total;
+    count_sum[datetime, key] += count;
+    num_records[datetime, key]++;
 }
-
 END {
-    # Iterate through the collected data and calculate the required metrics
-    for (key_minute in initial_running_total) {
-        split(key_minute, keys, SUBSEP);  # Split the composite key into datetime and key
-        datetime_minute = keys[1];
-        key = keys[2];
+    # Print the header
+    printf "%-20s %-15s %-15s %-20s %-15s\n", "Datetime", "Key", "Processed", "Pending Messages", "Total Processed";
 
-        # Calculate processed value
-        processed = final_running_total[datetime_minute, key] - initial_running_total[datetime_minute, key];
+    # Process each unique datetime and key combination
+    for (entry in first_total) {
+        split(entry, parts, SUBSEP);  # Split the composite key (datetime, key)
+        datetime = parts[1];
+        key = parts[2];
 
-        # Calculate average pending messages
-        avg_pending = total_pending[datetime_minute, key] / count[datetime_minute, key];
+        # Calculate processed value as the difference between last and first total
+        processed = last_total[datetime, key] - first_total[datetime, key];
 
-        # Print the results
-        print datetime_minute, key, processed, avg_pending, processed;
+        # Calculate pending messages as the average count
+        pending_messages = count_sum[datetime, key] / num_records[datetime, key];
+
+        # Print the results with proper formatting
+        printf "%-20s %-15s %-15d %-20.1f %-15d\n", datetime, key, processed, pending_messages, processed;
     }
 }
+' input.log
+
