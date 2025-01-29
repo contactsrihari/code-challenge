@@ -1,4 +1,3 @@
-pd.set_option('display.float_format', '{:,.0f}'.format)
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
@@ -13,38 +12,32 @@ log_data = """20250128 01:43:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428216000#1
 20250128 01:48:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428329000#12175
 20250128 01:48:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428359000#4175"""
 
-# Read log data into a Pandas DataFrame
-df = pd.read_csv(io.StringIO(log_data), sep='#', header=None, names=['datetime', 'chain_name', 'total_messages_added', 'pending_messages'])
+# ... (Data loading and preprocessing - same as before)
 
-# Convert datetime to proper datetime objects
-df['datetime'] = pd.to_datetime(df['datetime'], format='%Y%m%d %H:%M:%S,%f')
+# Plotting with subplots
+fig, axes = plt.subplots(len(df_resampled['chain_name'].unique()), 1, figsize=(12, 6 * len(df_resampled['chain_name'].unique())), sharex=True)  # sharex for common timeline
 
-# Set datetime as index
-df = df.set_index('datetime')
+if not isinstance(axes, (list,)): # handles the case of single chain_name
+    axes = [axes]
 
-# Resample to 5-minute intervals
-df_resampled = df.resample('5min').agg({'chain_name': 'first', 'total_messages_added': 'max', 'pending_messages': 'mean'})
-
-
-# Calculate 'processed_messages'
-df_resampled['processed_messages'] = df_resampled['total_messages_added'].diff().fillna(0) - df_resampled['pending_messages'].diff().fillna(0)
-
-
-# Plotting
-plt.figure(figsize=(12, 6))
-
-for chain in df_resampled['chain_name'].unique():
+for i, chain in enumerate(df_resampled['chain_name'].unique()):
     chain_data = df_resampled[df_resampled['chain_name'] == chain]
-    plt.plot(chain_data.index, chain_data['total_messages_added'], label=f'{chain} - Total Messages Added')
-    plt.plot(chain_data.index, chain_data['processed_messages'], label=f'{chain} - Processed Messages')
-    plt.plot(chain_data.index, chain_data['pending_messages'], label=f'{chain} - Avg Pending Messages')
+    ax = axes[i]  # Get the correct subplot axis
 
+    ax.plot(chain_data.index, chain_data['total_messages_added'], label='Total Messages Added')
+    ax.plot(chain_data.index, chain_data['processed_messages'], label='Processed Messages')
+    ax.plot(chain_data.index, chain_data['pending_messages'], label='Avg Pending Messages')
 
-plt.xlabel('Time')
-plt.ylabel('Count')
-plt.title('Message Queue Metrics (5-min Intervals)')
-plt.legend()
-plt.grid(True)
-plt.xticks(rotation=45)  # Rotate x-axis labels for readability
-plt.tight_layout() # Adjust layout to prevent labels from overlapping
+    ax.set_title(chain)  # Set title for each subplot
+    ax.set_ylabel('Count')
+    ax.legend()
+    ax.grid(True)
+    ax.tick_params(axis='x', rotation=45)  # Rotate x-axis labels
+    ax.xaxis.set_major_locator(plt.AutoLocator()) # improve x axis ticks
+    if i < len(df_resampled['chain_name'].unique()) -1:
+        ax.set_xticklabels([]) # remove x ticks for other plots
+
+plt.xlabel('Time')  # Common x-axis label
+plt.tight_layout()
+plt.subplots_adjust(hspace=0.3) # adjust space between subplots
 plt.show()
