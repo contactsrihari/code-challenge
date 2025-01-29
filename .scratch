@@ -1,3 +1,5 @@
+df_resampled = df_resampled.drop(columns=('total_messages_added'))
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
