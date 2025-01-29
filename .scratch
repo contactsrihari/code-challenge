@@ -1,42 +1,49 @@
-#!/bin/bash
+import pandas as pd
+import matplotlib.pyplot as plt
+import io
 
-awk -F '#' '
-{
-    # Extract datetime up to minute, key, total, and count
-    datetime = substr($1, 1, 16);  # Extract datetime up to minute
-    key = $2;                      # Extract the key
-    total = $3;                    # Extract the total
-    count = $4;                    # Extract the count
+# Sample log data (replace with your actual log file path)
+log_data = """20250128 01:43:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428216000#13427
+20250128 01:43:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428219000#12175
+20250128 01:43:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428229000#11175
+20250128 01:43:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428259000#3175
+20250128 01:48:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428316000#14427
+20250128 01:48:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428319000#13175
+20250128 01:48:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428329000#12175
+20250128 01:48:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428359000#4175"""
 
-    # Initialize first total and first count for each datetime, key combination
-    if (!(datetime, key) in first_total) {
-        first_total[datetime, key] = total;
-    }
+# Read log data into a Pandas DataFrame
+df = pd.read_csv(io.StringIO(log_data), sep='#', header=None, names=['datetime', 'chain_name', 'total_messages_added', 'pending_messages'])
 
-    # Update last total and accumulate count for the same datetime, key
-    last_total[datetime, key] = total;
-    count_sum[datetime, key] += count;
-    num_records[datetime, key]++;
-}
-END {
-    # Print the header
-    printf "%-20s %-15s %-15s %-20s %-15s\n", "Datetime", "Key", "Processed", "Pending Messages", "Total Processed";
+# Convert datetime to proper datetime objects
+df['datetime'] = pd.to_datetime(df['datetime'], format='%Y%m%d %H:%M:%S,%f')
 
-    # Process each unique datetime and key combination
-    for (entry in first_total) {
-        split(entry, parts, SUBSEP);  # Split the composite key (datetime, key)
-        datetime = parts[1];
-        key = parts[2];
+# Set datetime as index
+df = df.set_index('datetime')
 
-        # Calculate processed value as the difference between last and first total
-        processed = last_total[datetime, key] - first_total[datetime, key];
+# Resample to 5-minute intervals
+df_resampled = df.resample('5min').agg({'chain_name': 'first', 'total_messages_added': 'max', 'pending_messages': 'mean'})
 
-        # Calculate pending messages as the average count
-        pending_messages = count_sum[datetime, key] / num_records[datetime, key];
 
-        # Print the results with proper formatting
-        printf "%-20s %-15s %-15d %-20.1f %-15d\n", datetime, key, processed, pending_messages, processed;
-    }
-}
-' input.log
+# Calculate 'processed_messages'
+df_resampled['processed_messages'] = df_resampled['total_messages_added'].diff().fillna(0) - df_resampled['pending_messages'].diff().fillna(0)
 
+
+# Plotting
+plt.figure(figsize=(12, 6))
+
+for chain in df_resampled['chain_name'].unique():
+    chain_data = df_resampled[df_resampled['chain_name'] == chain]
+    plt.plot(chain_data.index, chain_data['total_messages_added'], label=f'{chain} - Total Messages Added')
+    plt.plot(chain_data.index, chain_data['processed_messages'], label=f'{chain} - Processed Messages')
+    plt.plot(chain_data.index, chain_data['pending_messages'], label=f'{chain} - Avg Pending Messages')
+
+
+plt.xlabel('Time')
+plt.ylabel('Count')
+plt.title('Message Queue Metrics (5-min Intervals)')
+plt.legend()
+plt.grid(True)
+plt.xticks(rotation=45)  # Rotate x-axis labels for readability
+plt.tight_layout() # Adjust layout to prevent labels from overlapping
+plt.show()
