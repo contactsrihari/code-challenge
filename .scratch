@@ -3,23 +3,26 @@ import matplotlib.pyplot as plt
 import io
 import matplotlib.ticker as ticker
 
-# Sample log data 
-log_data = """20250128 01:43:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428216000#13427
-20250128 01:43:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428219000#12175
-20250128 01:43:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428229000#11175
-20250128 01:43:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428259000#3175
-20250128 01:48:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428316000#14427
-20250128 01:48:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428319000#13175
-20250128 01:48:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428329000#12175
-20250128 01:48:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428359000#4175
-20250128 01:53:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428416000#15427
-20250128 01:53:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428419000#14175
-20250128 01:53:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428429000#13175
-20250128 01:53:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428459000#5175"""
+# ... (Sample data - same as before)
 
-#... (Data loading and preprocessing - same as before)
+df = pd.read_csv(io.StringIO(log_data), sep='#', header=None, names=['datetime', 'chain_name', 'total_messages_added', 'pending_messages'])
+df['datetime'] = pd.to_datetime(df['datetime'], format='%Y%m%d %H:%M:%S,%f')
+df = df.set_index('datetime')
 
-# Plotting with subplots
+# Resample and aggregate SEPARATELY for each chain
+dfs = []  # List to store resampled dataframes for each chain
+for chain in df['chain_name'].unique():
+    chain_df = df[df['chain_name'] == chain]
+    chain_resampled = chain_df.resample('5min').agg({'pending_messages': 'mean', 'total_messages_added': 'max'})
+    chain_resampled['record_count'] = chain_df.resample('5min').size()
+    chain_resampled['chain_name'] = chain  # Add the chain name back as a column
+    dfs.append(chain_resampled)
+
+df_resampled = pd.concat(dfs)  # Concatenate the resampled dataframes
+
+df_resampled['processed_messages'] = df_resampled['total_messages_added'].diff().fillna(0) - df_resampled['pending_messages'].diff().fillna(0)
+
+# Plotting (Corrected)
 num_chains = len(df_resampled['chain_name'].unique())
 fig, axes = plt.subplots(num_chains, 1, figsize=(12, 6 * num_chains), sharex=True)
 
@@ -41,11 +44,10 @@ for i, chain in enumerate(df_resampled['chain_name'].unique()):
     ax.tick_params(axis='x', rotation=45)
     ax.xaxis.set_major_locator(plt.AutoLocator())
 
-    # Format y-axis as full numbers
     ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
 
     if i < num_chains - 1:
-        ax.set_xticklabels()
+        ax.set_xticklabels([])
 
 plt.xlabel('Time')
 plt.tight_layout()
