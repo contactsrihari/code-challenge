@@ -1,3 +1,4 @@
+pd.set_option('display.float_format', '{:,.0f}'.format)
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
