@@ -10,34 +10,50 @@ log_data = """20250128 01:43:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428216000#1
 20250128 01:48:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428316000#14427
 20250128 01:48:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428319000#13175
 20250128 01:48:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428329000#12175
-20250128 01:48:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428359000#4175"""
+20250128 01:48:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428359000#4175
+20250128 01:53:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428416000#15427
+20250128 01:53:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428419000#14175
+20250128 01:53:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428429000#13175
+20250128 01:53:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428459000#5175"""
 
-# ... (Data loading and preprocessing - same as before)
+# If you have a file:
+# log_file_path = "path/to/your/log_file.txt"
+# df = pd.read_csv(log_file_path, sep='#', header=None, names=['datetime', 'chain_name', 'total_messages_added', 'pending_messages'])
+
+# Using the sample data:
+df = pd.read_csv(io.StringIO(log_data), sep='#', header=None, names=['datetime', 'chain_name', 'total_messages_added', 'pending_messages'])
+
+df['datetime'] = pd.to_datetime(df['datetime'], format='%Y%m%d %H:%M:%S,%f')
+df = df.set_index('datetime')
+
+df_resampled = df.resample('5min').agg({'chain_name': 'first', 'total_messages_added': 'max', 'pending_messages': 'mean'})
+
+df_resampled['processed_messages'] = df_resampled['total_messages_added'].diff().fillna(0) - df_resampled['pending_messages'].diff().fillna(0)
 
 # Plotting with subplots
-fig, axes = plt.subplots(len(df_resampled['chain_name'].unique()), 1, figsize=(12, 6 * len(df_resampled['chain_name'].unique())), sharex=True)  # sharex for common timeline
+fig, axes = plt.subplots(len(df_resampled['chain_name'].unique()), 1, figsize=(12, 6 * len(df_resampled['chain_name'].unique())), sharex=True)
 
 if not isinstance(axes, (list,)): # handles the case of single chain_name
     axes = [axes]
 
 for i, chain in enumerate(df_resampled['chain_name'].unique()):
     chain_data = df_resampled[df_resampled['chain_name'] == chain]
-    ax = axes[i]  # Get the correct subplot axis
+    ax = axes[i]
 
     ax.plot(chain_data.index, chain_data['total_messages_added'], label='Total Messages Added')
     ax.plot(chain_data.index, chain_data['processed_messages'], label='Processed Messages')
     ax.plot(chain_data.index, chain_data['pending_messages'], label='Avg Pending Messages')
 
-    ax.set_title(chain)  # Set title for each subplot
+    ax.set_title(chain)
     ax.set_ylabel('Count')
     ax.legend()
     ax.grid(True)
-    ax.tick_params(axis='x', rotation=45)  # Rotate x-axis labels
-    ax.xaxis.set_major_locator(plt.AutoLocator()) # improve x axis ticks
+    ax.tick_params(axis='x', rotation=45)
+    ax.xaxis.set_major_locator(plt.AutoLocator())
     if i < len(df_resampled['chain_name'].unique()) -1:
-        ax.set_xticklabels([]) # remove x ticks for other plots
+        ax.set_xticklabels([])
 
-plt.xlabel('Time')  # Common x-axis label
+plt.xlabel('Time')
 plt.tight_layout()
-plt.subplots_adjust(hspace=0.3) # adjust space between subplots
+plt.subplots_adjust(hspace=0.3)
 plt.show()
