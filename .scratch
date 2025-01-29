@@ -1,17 +1,36 @@
-# Plotting with subplots (Corrected)
-num_chains = len(df_resampled['chain_name'].unique())  # Store the number of chain names
+import pandas as pd
+import matplotlib.pyplot as plt
+import io
+import matplotlib.ticker as ticker
+
+# Sample log data 
+log_data = """20250128 01:43:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428216000#13427
+20250128 01:43:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428219000#12175
+20250128 01:43:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428229000#11175
+20250128 01:43:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428259000#3175
+20250128 01:48:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428316000#14427
+20250128 01:48:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428319000#13175
+20250128 01:48:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428329000#12175
+20250128 01:48:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428359000#4175
+20250128 01:53:30,913#USD.CLIENT.ANALYTICS.INSTRUMENTS#428416000#15427
+20250128 01:53:31,838#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428419000#14175
+20250128 01:53:33,920#TBA.FACTORS.ANALYTICS.ALL.FUTURE#428429000#13175
+20250128 01:53:37,234#USD.FUTURE_PRICING.INSTRUMENT.ANALYTICS.FUTURE#428459000#5175"""
+
+#... (Data loading and preprocessing - same as before)
+
+# Plotting with subplots
+num_chains = len(df_resampled['chain_name'].unique())
 fig, axes = plt.subplots(num_chains, 1, figsize=(12, 6 * num_chains), sharex=True)
 
-# Handle the case where there's only one chain
 if num_chains == 1:
-    axes = [axes]  # Make axes a list so we can iterate
+    axes = [axes]
 
 for i, chain in enumerate(df_resampled['chain_name'].unique()):
     chain_data = df_resampled[df_resampled['chain_name'] == chain]
+    ax = axes[i]
 
-    ax = axes[i]  # Correctly access the individual subplot axis
-
-    ax.plot(chain_data.index, chain_data['total_messages_added'], label='Total Messages Added')
+    ax.plot(chain_data.index, chain_data['record_count'], label='Record Count')
     ax.plot(chain_data.index, chain_data['processed_messages'], label='Processed Messages')
     ax.plot(chain_data.index, chain_data['pending_messages'], label='Avg Pending Messages')
 
@@ -22,8 +41,11 @@ for i, chain in enumerate(df_resampled['chain_name'].unique()):
     ax.tick_params(axis='x', rotation=45)
     ax.xaxis.set_major_locator(plt.AutoLocator())
 
-    if i < num_chains - 1:  # Corrected condition for hiding x-axis ticks
-        ax.set_xticklabels([])
+    # Format y-axis as full numbers
+    ax.yaxis.set_major_formatter(ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
+
+    if i < num_chains - 1:
+        ax.set_xticklabels()
 
 plt.xlabel('Time')
 plt.tight_layout()
