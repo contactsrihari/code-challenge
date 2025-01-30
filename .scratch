@@ -1,3 +1,6 @@
+# Handle NaN values (Corrected)
+df_resampled = df_resampled.fillna(0)  # Fill NaN with 0 or other appropriate value
+
 df_resampled = df_resampled.drop(columns=('total_messages_added'))
 
 import pandas as pd
