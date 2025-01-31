@@ -1,30 +1,18 @@
-# Handle NaN values (Corrected)
-df_resampled = df_resampled.fillna(0)  # Fill NaN with 0 or other appropriate value
-
-df_resampled = df_resampled.drop(columns=('total_messages_added'))
-
 import pandas as pd
-import matplotlib.pyplot as plt
-import io
-import matplotlib.ticker as ticker
 
-# ... (Sample data and data loading - same as before)
+# Sample data (you would load this from your file)
+data = {
+    'datetime_field': ['2025-01-30T22:32:11.048Z', '2025-02-15T10:15:30.123Z']
+}
 
-# Resample and aggregate SEPARATELY for each chain (initial aggregation)
-dfs = []
-for chain in df['chain_name'].unique():
-    chain_df = df[df['chain_name'] == chain]
-    chain_resampled = chain_df.resample('5min').agg({'pending_messages': 'mean', 'total_messages_added': ['first', 'last']}) # First and Last Total Messages
-    chain_resampled['record_count'] = chain_df.resample('5min').size()
-    chain_resampled['chain_name'] = chain
-    dfs.append(chain_resampled)
+# Create a DataFrame
+df = pd.DataFrame(data)
 
-df_resampled = pd.concat(dfs)
+# Convert the datetime_field to datetime object
+df['datetime_field'] = pd.to_datetime(df['datetime_field'])
 
-# Calculate processed_messages (Corrected - Difference between first and last)
-df_resampled['processed_messages'] = df_resampled['total_messages_added']['last'] - df_resampled['total_messages_added']['first']
+# Create a new column with only the date part
+df['date_only'] = df['datetime_field'].dt.date
 
-# Drop the multi-index columns for 'total_messages_added' (optional but cleaner)
-df_resampled.columns = ['pending_messages', 'record_count', 'chain_name', 'processed_messages']
-
-# ... (Plotting code - same as before)
+# Display the DataFrame
+print(df)
