@@ -29,3 +29,30 @@ df['date_only'] = df['datetime_field'].dt.date
 
 # Display the DataFrame
 print(df)
+
+
+
+---------
+
+import pandas as pd
+
+# Sample DataFrame
+data = {
+    'chain': ['A', 'B', 'A', 'C', 'B', 'A', 'C'],
+    'date': ['2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04', '2025-01-05', '2025-01-06', '2025-01-07'],
+    'amount': [100, 200, 150, 250, 300, 350, 400]
+}
+
+df = pd.DataFrame(data)
+
+# Group by 'chain' and count the occurrences (just count per 'chain')
+grouped_result = df.groupby('chain').agg({
+    'chain': 'size',  # Count the number of records per chain
+}).reset_index()
+
+# Rename the columns for clarity
+grouped_result.rename(columns={'chain': 'count'}, inplace=True)
+
+# Display the result
+print(grouped_result)
+
