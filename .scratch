@@ -1,4 +1,12 @@
+result = df.groupby('name').filter(lambda x: x['chain'].isna().any())
+
+# Count occurrences of each name where 'chain' is NaN
+count_result = result['name'].value_counts().reset_index()
+count_result.columns = ['name', 'count']
+
+
 df.dropna(subset=['date_column'], inplace=True)
+
 filtered_df = df.query('date_column.dt.date == "2025-01-30"')
 # Convert the column to datetime explicitly
 df['datetime_column'] = pd.to_datetime(df['datetime_column'], format='%Y-%m-%dT%H:%M:%S.%fZ', errors='coerce')
