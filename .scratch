@@ -1,63 +1,29 @@
-df_filtered = df[df['datetime'].dt.date == pd.to_datetime('2025-01-30').date()]
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util.xsd">
 
-pd.set_option('display.max_colwidth', None)
-pd.set_option('display.max_rows', None)  
+    <!-- Define the Map with String keys and Set<String> values -->
+    <util:map id="stringSetMap">
+        <!-- Entry for key "group1" -->
+        <entry key="group1">
+            <util:set>
+                <value>Value1</value>
+                <value>Value2</value>
+                <value>Value3</value>
+            </util:set>
+        </entry>
+        <!-- Entry for key "group2" -->
+        <entry key="group2">
+            <util:set>
+                <value>ValueA</value>
+                <value>ValueB</value>
+            </util:set>
+        </entry>
+    </util:map>
 
-result = df.groupby('name').filter(lambda x: x['chain'].isna().any())
-
-# Count occurrences of each name where 'chain' is NaN
-count_result = result['name'].value_counts().reset_index()
-count_result.columns = ['name', 'count']
-
-
-df.dropna(subset=['date_column'], inplace=True)
-
-filtered_df = df.query('date_column.dt.date == "2025-01-30"')
-# Convert the column to datetime explicitly
-df['datetime_column'] = pd.to_datetime(df['datetime_column'], format='%Y-%m-%dT%H:%M:%S.%fZ', errors='coerce')
-
-import pandas as pd
-
-# Sample data (you would load this from your file)
-data = {
-    'datetime_field': ['2025-01-30T22:32:11.048Z', '2025-02-15T10:15:30.123Z']
-}
-
-# Create a DataFrame
-df = pd.DataFrame(data)
-
-# Convert the datetime_field to datetime object
-df['datetime_field'] = pd.to_datetime(df['datetime_field'])
-
-# Create a new column with only the date part
-df['date_only'] = df['datetime_field'].dt.date
-
-# Display the DataFrame
-print(df)
-
-
-
----------
-
-import pandas as pd
-
-# Sample DataFrame
-data = {
-    'chain': ['A', 'B', 'A', 'C', 'B', 'A', 'C'],
-    'date': ['2025-01-01', '2025-01-02', '2025-01-03', '2025-01-04', '2025-01-05', '2025-01-06', '2025-01-07'],
-    'amount': [100, 200, 150, 250, 300, 350, 400]
-}
-
-df = pd.DataFrame(data)
-
-# Group by 'chain' and count the occurrences (just count per 'chain')
-grouped_result = df.groupby('chain').agg({
-    'chain': 'size',  # Count the number of records per chain
-}).reset_index()
-
-# Rename the columns for clarity
-grouped_result.rename(columns={'chain': 'count'}, inplace=True)
-
-# Display the result
-print(grouped_result)
+</beans>
 
