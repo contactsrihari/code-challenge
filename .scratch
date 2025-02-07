@@ -1,3 +1,12 @@
+
+date -d "20250207 10:35:29,500" +%s.%3N  # Output: 1739001329.500
+diff=$(echo "1739001330.700 - 1739001329.500" | awk '{print $1-$2}')
+echo $diff  # Output: 1.2
+
+diff_ms=$(echo "$diff * 1000" | bc)
+echo $diff_ms  # Output: 1200
+
+
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:util="http://www.springframework.org/schema/util"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
