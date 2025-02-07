@@ -1,3 +1,10 @@
+awk '{
+  cmd = "date"
+  cmd | getline output
+  close(cmd) # Important: Close the pipe
+  print output
+}' file.txt
+
 awk '{ gsub(/^ +| +$/, "", $0); print }' file.txt
 
 date -d "20250207 10:35:29,500" +%s.%3N  # Output: 1739001329.500
