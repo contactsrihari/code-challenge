@@ -1,10 +1,4 @@
 
-select from
--ui.generateCustomQueryView[
-C region’ desk’ viewName customDict  batchEnv’ partition userId)!
-(enlist “NAM; "UST; *POSITION_BREAKDOWN;enlist ~$"(*pnlMode’pnlKind’ positionType)!(°LIVE; BID; POSITION)"; Official; treasury; cw42536_ContextChannel_1);
-LiveRisks]
-
 
 awk '{
   cmd = "date"
