@@ -1,4 +1,6 @@
 
+jmap -dump:live,format=b,file=/tmp/heapdump.hprof 12345
+jcmd <PID> GC.heap_dump /tmp/heapdump.hprof
 
 awk '{
   cmd = "date"
