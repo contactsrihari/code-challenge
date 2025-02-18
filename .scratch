@@ -1,3 +1,4 @@
+-agentpath:/home/user/yjpagent.so=port=10001,listen=all
 #8a7ceb753aa
 
 jmap -dump:live,format=b,file=/tmp/heapdump.hprof 12345
