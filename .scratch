@@ -1,3 +1,21 @@
+function_wrapper() {
+    local default_arg="$1"  # Default argument from alias
+    shift  # Remove the first argument (default value)
+    local arg="${1:-$default_arg}"  # Override if a new argument is provided
+    echo "checking which argument taken - $arg"
+}
+
+alias pricegrid1='function_wrapper "not special"'
+alias pricegrid2='function_wrapper "not too special"'
+
+---
+pricegrid1                # Output: checking which argument taken - not special
+pricegrid1 "very special"  # Output: checking which argument taken - very special
+
+pricegrid2                # Output: checking which argument taken - not too special
+pricegrid2 "super special"  # Output: checking which argument taken - super special
+
+
 -agentpath:/home/user/yjpagent.so=port=10001,listen=all
 #8a7ceb753aa
 
