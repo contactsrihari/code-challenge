@@ -1,3 +1,47 @@
+
+String query = "[key.tck == #tck && key.market == #market && key.marketSectorDescription == #marketSector]";
+Map<String, Object> variables = new HashMap<>();
+variables.put("tck", tck);
+variables.put("market", market);
+variables.put("marketSector", marketSector);
+
+Map multiplierEntry = parser.parseExpression(query).getValue(context, Map.class, variables);
+-------
+
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+
+public class SafeSpELExample {
+    public static void main(String[] args) {
+        // Input variables
+        String tck = "someTckValue";
+        String market = "someMarketValue";
+        String marketSector = "someMarketSectorValue";
+
+        // Create a parser
+        ExpressionParser parser = new SpelExpressionParser();
+
+        // Create a context and set variables
+        StandardEvaluationContext context = new StandardEvaluationContext();
+        context.setVariable("tck", tck);
+        context.setVariable("market", market);
+        context.setVariable("marketSector", marketSector);
+
+        // Define the SpEL expression with placeholders
+        String query = "[key.tck == #tck && key.market == #market && key.marketSectorDescription == #marketSector]";
+
+        // Parse and evaluate the expression
+        Expression expression = parser.parseExpression(query);
+        Map<?, ?> multiplierEntry = expression.getValue(context, Map.class);
+
+        // Use the result
+        System.out.println(multiplierEntry);
+    }
+}
+------
+
 function_wrapper() {
     local default_arg="$1"  # Default argument from alias
     shift  # Remove the first argument (default value)
