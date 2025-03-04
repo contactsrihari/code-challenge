@@ -1,3 +1,19 @@
-$('select[name="appInstances"] option').filter(function() {
-    return $(this).text() === 'RATES TRADER DESKTOP-APAC-UAT--1';
-}).prop('selected', true).trigger('change');
+async function processItem(item) {
+    console.log(`Processing: ${item}`);
+    // Simulate an async operation (like an API call)
+    await new Promise(resolve => setTimeout(resolve, 1000));
+}
+
+async function runWithPause(items) {
+    for (let item of items) {
+        await processItem(item);
+        let proceed = confirm("Continue to the next item?");
+        if (!proceed) {
+            console.log("Stopped by user.");
+            break;
+        }
+    }
+}
+
+let items = ["Item1", "Item2", "Item3"];
+runWithPause(items);
