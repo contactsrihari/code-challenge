@@ -25,3 +25,9 @@ $('input[name="email"]').val('someone@example.com').trigger('change');
 $('select[name="your-select-name"]').val('desired-option-value').trigger('change');
 
 $('select[name="req.wipLbModeSelected"]').val('object:426').trigger('change');
+
+angular.element(document.querySelector('select[ng-model="req.wipLbModeSelected"]')).scope().req.wipLbModeSelected = 'object:426';
+angular.element(document.querySelector('select[ng-model="req.wipLbModeSelected"]')).scope().$apply();
+
+
+$('select[ng-model="req.wipLbModeSelected"]').val('object:426').trigger('change');
