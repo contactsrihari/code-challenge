@@ -31,3 +31,5 @@ angular.element(document.querySelector('select[ng-model="req.wipLbModeSelected"]
 
 
 $('select[ng-model="req.wipLbModeSelected"]').val('object:426').trigger('change');
+
+$('button[ng-click="req.addNewWIP(req)"]').click();
