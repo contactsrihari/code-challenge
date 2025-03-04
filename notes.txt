@@ -1,0 +1,13 @@
+
+let input = $('#your-input-id'); // Or $('.your-class')
+input.val('Your value').trigger($.Event('keypress', { key: 'Enter', keyCode: 13 }));
+
+
+input.val('Your value').trigger('change');
+input.val('Your value').trigger('blur');
+
+input.val('Your value').trigger($.Event('keyup', { key: 'Enter', keyCode: 13 }));
+
+
+let event = new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true });
+input[0].dispatchEvent(event);
