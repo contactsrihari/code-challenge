@@ -21,3 +21,5 @@ setTimeout(() => {
 
 
 $('input[name="email"]').val('someone@example.com').trigger('change');
+
+$('select[name="your-select-name"]').val('desired-option-value').trigger('change');
