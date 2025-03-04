@@ -33,3 +33,8 @@ angular.element(document.querySelector('select[ng-model="req.wipLbModeSelected"]
 $('select[ng-model="req.wipLbModeSelected"]').val('object:426').trigger('change');
 
 $('button[ng-click="req.addNewWIP(req)"]').click();
+
+
+$('select[ng-model="req.wipLbModeSelected"] option').filter(function() {
+    return $(this).text() === 'Round Robin';
+}).prop('selected', true).trigger('change');
