@@ -11,3 +11,10 @@ input.val('Your value').trigger($.Event('keyup', { key: 'Enter', keyCode: 13 }))
 
 let event = new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true });
 input[0].dispatchEvent(event);
+
+
+setTimeout(() => {
+    $('.btn-class').filter(function() {
+        return $(this).text().trim() === 'Click Me';
+    }).get(0)?.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+}, 500); 
