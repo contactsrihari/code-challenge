@@ -38,3 +38,10 @@ $('button[ng-click="req.addNewWIP(req)"]').click();
 $('select[ng-model="req.wipLbModeSelected"] option').filter(function() {
     return $(this).text() === 'Round Robin';
 }).prop('selected', true).trigger('change');
+
+
+$scope.req.wipMonitorSelected.id = 3;
+i$('input[name="httpResponseCode"]').attr('ng-required', 'false');
+
+// Set the value and trigger the change event
+$('input[name="httpResponseCode"]').val(200).trigger('change');
