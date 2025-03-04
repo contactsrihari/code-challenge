@@ -45,3 +45,14 @@ i$('input[name="httpResponseCode"]').attr('ng-required', 'false');
 
 // Set the value and trigger the change event
 $('input[name="httpResponseCode"]').val(200).trigger('change');
+
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function executeFunctions() {
+    firstFunction(); // Call first function immediately
+    await delay(2000); // Wait for 2 seconds
+    secondFunction(); // Call second function after 2 seconds
+}
