@@ -1,3 +1,5 @@
+jstack <pid> > threadDump_$(date +%Y%m%d%H%M%S).txt
+
 async function processItem(item) {
     console.log(`Processing: ${item}`);
     // Simulate an async operation (like an API call)
