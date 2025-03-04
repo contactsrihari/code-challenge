@@ -17,3 +17,18 @@ async function runWithPause(items) {
 
 let items = ["Item1", "Item2", "Item3"];
 runWithPause(items);
+
+
+----------
+
+fetch('https://www.example.com')
+   .then(response => response.text())
+   .then(data => {
+       // Manipulate DOM with the loaded content
+       document.body.innerHTML = data;
+       // Continue executing your script actions
+       console.log("Page loaded and script continues executing!");
+   })
+   .catch(error => {
+       console.error('Error loading page:', error);
+   });
