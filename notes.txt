@@ -1,3 +1,6 @@
+
+@Value("#{'${my.list.of.values}'.split(',')}")
+
 jstack <pid> > threadDump_$(date +%Y%m%d%H%M%S).txt
 
 async function processItem(item) {
