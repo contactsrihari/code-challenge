@@ -1,4 +1,21 @@
+mport java.util.*;
+import java.util.stream.Collectors;
 
+public class StreamToMapExample {
+
+    public static void main(String[] args) {
+        // Sample list of key-value pairs as strings
+        List<String> keyValuePairs = Arrays.asList("apple:red", "banana:yellow", "grape:purple");
+
+        // Convert the list of key-value pairs to a map using streams
+        Map<String, String> fruitColors = keyValuePairs.stream()
+                .map(pair -> pair.split(":")) // Split each string into key-value array
+                .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1])); // Collect to a Map
+
+        // Print the resulting map
+        fruitColors.forEach((key, value) -> System.out.println(key + " is " + value));
+    }
+=------------------------
 @Value("#{'${my.list.of.values}'.split(',')}")
 
 
