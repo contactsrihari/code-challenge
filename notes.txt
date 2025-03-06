@@ -1,3 +1,7 @@
+
+
+@Value("#{${'${my.map.values}'.split(',')}.stream().collect(T(java.util.stream.Collectors).toMap(k -> k.split(':')[0], v -> v.split(':')[1]))}")
+
 mport java.util.*;
 import java.util.stream.Collectors;
 
