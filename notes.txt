@@ -1,82 +1,22 @@
-
-
-@Value("#{${'${my.map.values}'.split(',')}.stream().collect(T(java.util.stream.Collectors).toMap(k -> k.split(':')[0], v -> v.split(':')[1]))}")
-
-mport java.util.*;
-import java.util.stream.Collectors;
-
-public class StreamToMapExample {
-
-    public static void main(String[] args) {
-        // Sample list of key-value pairs as strings
-        List<String> keyValuePairs = Arrays.asList("apple:red", "banana:yellow", "grape:purple");
-
-        // Convert the list of key-value pairs to a map using streams
-        Map<String, String> fruitColors = keyValuePairs.stream()
-                .map(pair -> pair.split(":")) // Split each string into key-value array
-                .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1])); // Collect to a Map
-
-        // Print the resulting map
-        fruitColors.forEach((key, value) -> System.out.println(key + " is " + value));
-    }
-=------------------------
-@Value("#{'${my.list.of.values}'.split(',')}")
-
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
-public class FruitColorService {
+public class ServiceConfig {
 
-    @Value("#{${'${my.map.values}'.split(',')}.stream().collect(T(java.util.stream.Collectors).toMap(k -> k.split(':')[0], v -> v.split(':')[1]))}")
-    private Map<String, String> fruitColors;
+    private Map<String, String> serviceMap = new HashMap<>();
 
-    public void printFruitColors() {
-        fruitColors.forEach((fruit, color) -> System.out.println(fruit + " is " + color));
+    @Value("#{T(java.util.Arrays).stream('${services.map}'.split(','))" +
+           ".map(entry -> entry.split(':'))" +
+           ".collect(T(java.util.stream.Collectors).toMap(entry -> entry[0], entry -> entry[1]))}")
+    public void setServiceMap(Map<String, String> serviceMap) {
+        this.serviceMap = serviceMap;
+    }
+
+    public Map<String, String> getServiceMap() {
+        return serviceMap;
     }
 }
-
-my.map.values=apple:red,banana:yellow,grape:purple
--------------
-
-jstack <pid> > threadDump_$(date +%Y%m%d%H%M%S).txt
-
-async function processItem(item) {
-    console.log(`Processing: ${item}`);
-    // Simulate an async operation (like an API call)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-}
-
-async function runWithPause(items) {
-    for (let item of items) {
-        await processItem(item);
-        let proceed = confirm("Continue to the next item?");
-        if (!proceed) {
-            console.log("Stopped by user.");
-            break;
-        }
-    }
-}
-
-let items = ["Item1", "Item2", "Item3"];
-runWithPause(items);
-
-
-----------
-
-fetch('https://www.example.com')
-   .then(response => response.text())
-   .then(data => {
-       // Manipulate DOM with the loaded content
-       document.body.innerHTML = data;
-       // Continue executing your script actions
-       console.log("Page loaded and script continues executing!");
-   })
-   .catch(error => {
-       console.error('Error loading page:', error);
-   });
