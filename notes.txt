@@ -1,22 +1,20 @@
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@Component
-public class ServiceConfig {
+public class StringToMapExample {
+    public static void main(String[] args) {
+        String input = "site1:url1|site2:url2|site3:url3";
 
-    private Map<String, String> serviceMap = new HashMap<>();
+        // Convert the string to a Map
+        Map<String, String> map = Stream.of(input.split("\\|")) // Split by pipe
+                .map(entry -> entry.split(":")) // Split each entry by colon
+                .collect(Collectors.toMap(
+                        parts -> parts[0], // Key is the first part
+                        parts -> parts[1]  // Value is the second part
+                ));
 
-    @Value("#{T(java.util.Arrays).stream('${services.map}'.split(','))" +
-           ".map(entry -> entry.split(':'))" +
-           ".collect(T(java.util.stream.Collectors).toMap(entry -> entry[0], entry -> entry[1]))}")
-    public void setServiceMap(Map<String, String> serviceMap) {
-        this.serviceMap = serviceMap;
-    }
-
-    public Map<String, String> getServiceMap() {
-        return serviceMap;
+        // Print the map
+        System.out.println(map);
     }
 }
