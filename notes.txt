@@ -1,3 +1,5 @@
+f291lad364didbc956db011ba675f5c36
+
 gradle clean build publishToMavenLocal --debug
 
 import java.util.Map;
