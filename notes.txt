@@ -1,4 +1,26 @@
-f291lad364didbc956db011ba675f5c36
+    <bean id="keyValueMapBean" class="java.util.HashMap">
+        <constructor-arg>
+            <map>
+                <entry key="key1" value="value1"/>
+                <entry key="key2" value="value2"/>
+                <entry key="key3" value="value3"/>
+                <!-- Add more key-value pairs as needed -->
+            </map>
+        </constructor-arg>
+    </bean>
+
+
+    <bean id="regionListBean" class="java.util.ArrayList">
+        <constructor-arg>
+            <list>
+                <value>NAM</value>
+                <value>EMEA</value>
+                <value>ASPAC</value>
+                <value>SY</value>
+                <value>TK</value>
+            </list>
+        </constructor-arg>
+    </bean>    
 
 gradle clean build publishToMavenLocal --debug
 
