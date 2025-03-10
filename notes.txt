@@ -1,3 +1,32 @@
+
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/util
+           http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- Define a map using util:map -->
+    <util:map id="serviceUrlMap" key-type="java.lang.String" value-type="java.lang.String">
+        <entry key="Join" value="JOINING_SERVICE_REST_URL"/>
+        <entry key="Price" value="PRICE_SERVICE_REST_URL"/>
+        <entry key="MarketControl" value="MARKETCONTROL_SERVICE_REST_URL"/>
+        <entry key="Publish" value="PUBLISH_SERVICE_REST_URL"/>
+    </util:map>
+
+</beans>
+
+<util:list id="regionListBean" value-type="java.lang.String">
+    <value>NAM</value>
+    <value>EMEA</value>
+    <value>ASPAC</value>
+    <value>SY</value>
+    <value>TK</value>
+</util:list>
+
+
     <bean id="keyValueMapBean" class="java.util.HashMap">
         <constructor-arg>
             <map>
