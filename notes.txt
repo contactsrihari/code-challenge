@@ -27,7 +27,8 @@ Sub MergeColumnBByColumnA()
     resultRow = 2
 
     ' Output results
-    For Each key In dict.keys
+    Dim key As Variant
+    For Each key In dict.Keys
         ws.Cells(resultRow, 4).Value = key
         ws.Cells(resultRow, 5).Value = dict(key)
         resultRow = resultRow + 1
