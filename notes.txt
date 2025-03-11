@@ -1,4 +1,6 @@
-awk -F'#' '{count[$1]++; lines[$1]=lines[$1] ? lines[$1] ORS $0 : $0} END {for (k in count) print count[k], lines[k]}' yourfile.txt | sort -k1,1n
+
+awk -F'#' '{count[$1]++; records[$1]=records[$1] ? records[$1] ORS $0 : $0} END {for (k in records) {split(records[k], lines, ORS); for (i in lines) print count[k], lines[i]}}' yourfile.txt | sort -k1,1n
+wk -F'#' '{count[$1]++; lines[$1]=lines[$1] ? lines[$1] ORS $0 : $0} END {for (k in count) print count[k], lines[k]}' yourfile.txt | sort -k1,1n
 
 
 Sub MergeColumnBByColumnA()
