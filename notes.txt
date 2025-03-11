@@ -1,75 +1,41 @@
+Sub MergeColumnBByColumnA()
+    Dim ws As Worksheet
+    Dim dict As Object
+    Dim lastRow As Long
+    Dim i As Long
+    Dim key As String
+    Dim resultRow As Long
 
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans.xsd
-           http://www.springframework.org/schema/util
-           http://www.springframework.org/schema/util/spring-util.xsd">
+    Set ws = ActiveSheet
+    Set dict = CreateObject("Scripting.Dictionary")
 
-    <!-- Define a map using util:map -->
-    <util:map id="serviceUrlMap" key-type="java.lang.String" value-type="java.lang.String">
-        <entry key="Join" value="JOINING_SERVICE_REST_URL"/>
-        <entry key="Price" value="PRICE_SERVICE_REST_URL"/>
-        <entry key="MarketControl" value="MARKETCONTROL_SERVICE_REST_URL"/>
-        <entry key="Publish" value="PUBLISH_SERVICE_REST_URL"/>
-    </util:map>
+    ' Find the last row in Column A
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
 
-</beans>
+    ' Loop through all rows and collect values
+    For i = 2 To lastRow ' Assuming row 1 is the header
+        key = ws.Cells(i, 1).Value
+        If Not dict.exists(key) Then
+            dict.Add key, ws.Cells(i, 2).Value
+        Else
+            dict(key) = dict(key) & ", " & ws.Cells(i, 2).Value
+        End If
+    Next i
 
-<util:list id="regionListBean" value-type="java.lang.String">
-    <value>NAM</value>
-    <value>EMEA</value>
-    <value>ASPAC</value>
-    <value>SY</value>
-    <value>TK</value>
-</util:list>
+    ' Clear existing data or move results to a new location
+    ws.Range("D1:E1").Value = Array("Column A", "Merged Column B")
+    resultRow = 2
 
+    ' Output results
+    For Each key In dict.keys
+        ws.Cells(resultRow, 4).Value = key
+        ws.Cells(resultRow, 5).Value = dict(key)
+        resultRow = resultRow + 1
+    Next key
 
-    <bean id="keyValueMapBean" class="java.util.HashMap">
-        <constructor-arg>
-            <map>
-                <entry key="key1" value="value1"/>
-                <entry key="key2" value="value2"/>
-                <entry key="key3" value="value3"/>
-                <!-- Add more key-value pairs as needed -->
-            </map>
-        </constructor-arg>
-    </bean>
+    ' Cleanup
+    Set dict = Nothing
 
+    MsgBox "Merge complete!"
+End Sub
 
-    <bean id="regionListBean" class="java.util.ArrayList">
-        <constructor-arg>
-            <list>
-                <value>NAM</value>
-                <value>EMEA</value>
-                <value>ASPAC</value>
-                <value>SY</value>
-                <value>TK</value>
-            </list>
-        </constructor-arg>
-    </bean>    
-
-gradle clean build publishToMavenLocal --debug
-
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-public class StringToMapExample {
-    public static void main(String[] args) {
-        String input = "site1:url1|site2:url2|site3:url3";
-
-        // Convert the string to a Map
-        Map<String, String> map = Stream.of(input.split("\\|")) // Split by pipe
-                .map(entry -> entry.split(":")) // Split each entry by colon
-                .collect(Collectors.toMap(
-                        parts -> parts[0], // Key is the first part
-                        parts -> parts[1]  // Value is the second part
-                ));
-
-        // Print the map
-        System.out.println(map);
-    }
-}
