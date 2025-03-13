@@ -1,3 +1,7 @@
+
+sed -E '/^#?prop\.value/ {s/^#?//; t; s/^/#/}' file.txt
+sed -E 's/^#?//;t; s/^/#/' file.txt
+
 awk -F'#' '{
     split($2, values, ",")
     delete seen
