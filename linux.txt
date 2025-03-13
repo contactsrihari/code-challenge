@@ -1,0 +1,15 @@
+# toggle givenn property's comment lines
+sed -E '/prop\.value/ { /#/ s/^#//; t; s/^/#/; }' file.txt
+
+file.txt:
+prop.value=new
+#prop.value=old
+
+output:
+#prop.value=new
+prop.value=old
+
+
+
+
+
