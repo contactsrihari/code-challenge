@@ -1,4 +1,5 @@
-/14893201/Velocity+ Servert+release + 20250328
+find . -type f ! -exec test -L {} \; ! -exec test -e {} \; -exec rm -v {} +
+
 sed -E '/^#?prop\.value/ {s/^#?//; t; s/^/#/}' file.txt
 sed -E 's/^#?//;t; s/^/#/' file.txt
 
