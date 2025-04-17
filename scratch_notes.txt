@@ -1,0 +1,40 @@
+javac -cp "path/to/streamlink-java.jar" StreamLinkExample.java
+
+import com.caplin.streamlink.StreamLink;
+import com.caplin.streamlink.StreamLinkFactory;
+import com.caplin.streamlink.Subscription;
+import com.caplin.streamlink.SubscriptionListener;
+import com.caplin.streamlink.SubscriptionEvent;
+
+public class StreamLinkExample {
+    public static void main(String[] args) {
+        try {
+            // Initialize StreamLink with server details
+            StreamLink streamLink = StreamLinkFactory.createStreamLink("liberator1", 18080);
+
+            // Define the subject to subscribe to
+            String subject = "/EXAMPLE/subject";
+
+            // Create a subscription listener to handle incoming data
+            SubscriptionListener listener = new SubscriptionListener() {
+                @Override
+                public void onSubscriptionEvent(SubscriptionEvent event) {
+                    System.out.println("Received update: " + event.getRecord());
+                }
+
+                @Override
+                public void onSubscriptionStatus(Subscription subscription, int status) {
+                    System.out.println("Subscription status: " + status);
+                }
+            };
+
+            // Create and activate the subscription
+            Subscription subscription = streamLink.createSubscription(subject, listener);
+            subscription.activate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
