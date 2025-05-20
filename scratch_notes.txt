@@ -1,3 +1,7 @@
+cd $JAVA_HOME/jmods
+jmod extract --dir /tmp/jdk.unsupported jdk.unsupported.jmod
+find /tmp/jdk.unsupported -name '*BASE64Encoder*'
+
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs += [
         '--add-exports', 'jdk.unsupported/sun.misc=ALL-UNNAMED'
