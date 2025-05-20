@@ -1,3 +1,6 @@
+javac --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED YourClass.java
+java --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED YourClass
+
 javac -cp "path/to/streamlink-java.jar" StreamLinkExample.java
 
 import com.caplin.streamlink.StreamLink;
