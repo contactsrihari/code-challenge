@@ -1,3 +1,12 @@
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += [
+        '--add-exports', 'jdk.unsupported/sun.misc=ALL-UNNAMED'
+    ]
+}
+run {
+    jvmArgs += ['--add-exports', 'jdk.unsupported/sun.misc=ALL-UNNAMED']
+}
+
 org.gradle.jvmargs=--add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
 javac --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED YourClass.java
 java --add-exports jdk.unsupported/sun.misc=ALL-UNNAMED YourClass
