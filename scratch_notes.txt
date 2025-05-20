@@ -1,3 +1,21 @@
+jdeps --module-path $JAVA_HOME/jmods --package sun.misc
+
+jdeps --module-path $JAVA_HOME/jmods --recursive \
+  --include sun.misc.BASE64Decoder \
+  $JAVA_HOME/jmods/jdk.unsupported.jmod
+
+
+jdeps --module-path $JAVA_HOME/jmods --list-deps --print-module-deps -q \
+  --multi-release 11 \
+  --class-path your.jar \
+  your.class
+
+
+javap --module jdk.unsupported sun.misc.BASE64Decoder
+
+jdeps --module-path $JAVA_HOME/jmods --list-deps $JAVA_HOME/lib/modules
+
+
 cd $JAVA_HOME/jmods
 jmod extract --dir /tmp/jdk.unsupported jdk.unsupported.jmod
 find /tmp/jdk.unsupported -name '*BASE64Encoder*'
