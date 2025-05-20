@@ -1,3 +1,9 @@
+java --patch-module jdk.unsupported=path/to/compat-sun-misc.jar \
+     -cp build/libs/your-app.jar \
+     your.main.ClassName
+
+
+
 jdeps --module-path $JAVA_HOME/jmods --package sun.misc
 
 jdeps --module-path $JAVA_HOME/jmods --recursive \
