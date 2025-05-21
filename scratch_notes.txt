@@ -1,3 +1,12 @@
+awk -F'#' '{
+  nanos = $3;
+  total_sec = nanos / 1000000000;
+  minutes = int(total_sec / 60);
+  seconds = total_sec % 60;
+  printf "%s#%s#%s (%.0f ns => %d min %.3f sec)#%s\n", $1, $2, nanos, nanos, minutes, seconds, $4;
+}' input_file
+
+
 java --patch-module jdk.unsupported=path/to/compat-sun-misc.jar \
      -cp build/libs/your-app.jar \
      your.main.ClassName
