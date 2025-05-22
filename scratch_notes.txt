@@ -1,3 +1,5 @@
+def libsDirectory = file("$projectDir/libs") 
+
 org.gradle.jvmargs=--add-opens java.base/org.mockito.internal.util=ALL-UNNAMED
 
 awk -F'#' '{
