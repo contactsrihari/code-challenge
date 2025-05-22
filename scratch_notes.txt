@@ -1,3 +1,5 @@
+org.gradle.jvmargs=--add-opens java.base/org.mockito.internal.util=ALL-UNNAMED
+
 awk -F'#' '{
   nanos = $3;
   total_sec = nanos / 1000000000;
