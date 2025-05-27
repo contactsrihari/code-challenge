@@ -1,3 +1,13 @@
+./gradlew test --tests "com.citi.connectivity.datamodel.TestTrade" \
+  --no-daemon \
+  -Dorg.gradle.jvmargs="--add-opens java.base/java.lang=ALL-UNNAMED"
+
+
+test {
+    jvmArgs '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+            '--add-opens', 'java.base/java.util=ALL-UNNAMED'
+}
+
 def libsDirectory = file("$projectDir/libs") 
 
 org.gradle.jvmargs=--add-opens java.base/org.mockito.internal.util=ALL-UNNAMED
