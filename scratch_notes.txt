@@ -1,3 +1,5 @@
+./gradlew dependencies --configuration compileClasspath
+
 repositories {
     maven {
         url "https://your-artifactory-url/artifactory/libs-release"
