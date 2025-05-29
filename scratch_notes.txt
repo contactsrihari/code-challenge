@@ -1,3 +1,14 @@
+repositories {
+    maven {
+        url "https://your-artifactory-url/artifactory/libs-release"
+        metadataSources {
+            artifact() // Use artifact-only if no POM is found
+            mavenPom() // Still try to use POM if available
+        }
+    }
+}
+
+
 ./gradlew test --tests "com.citi.connectivity.datamodel.TestTrade" \
   --no-daemon \
   -Dorg.gradle.jvmargs="--add-opens java.base/java.lang=ALL-UNNAMED"
