@@ -1,3 +1,20 @@
+FESXZ5	Leading Eurozone blue chips
+FDAXZ5	German blue chip index
+FDXMZ5	Smaller DAX futures
+FGBLZ5	10-year German bond
+FGBMZ5	5-year German bond
+FGBSZ5	2-year German bond
+FGBXZ5	30-year German bond
+FSTXZ5	Pan-European blue chips
+FSTBZ5	Eurozone bank sector
+FSTIZ5	Eurozone insurance sector
+FVSZ5	Eurozone volatility index
+CCOZ25	Commodity index
+XLINZ25	Industrial metals subindex
+XLPRZ25	Precious metals subindex
+XLXBZ25	Ex-agriculture/livestock index
+
+
 configurations.all {
     resolutionStrategy {
         force 'jline:jline:0.9.93'
