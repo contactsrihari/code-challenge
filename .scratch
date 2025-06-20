@@ -1,3 +1,6 @@
+FiddlerApplication.oProxy.UpstreamGateway = new Proxy("http=euwebproxy.wlb.eur.nsroot.net:80");
+FiddlerApplication.oProxy.UpstreamGateway.Credentials = new System.Net.NetworkCredential("sk38994", "xxx", "");  // Or add domain if needed
+
 if (oSession.oRequest.headers.ExistsAndContains("Proxy-Authorization", ""))
 {
     // Already authorized
