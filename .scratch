@@ -1,3 +1,4 @@
+netsh winhttp set proxy 127.0.0.1:8888
 fiddler.exe /upstreamproxy:"http=euwebproxy.wlb.eur.nsroot.net:80"
 
 netsh winhttp show proxy
