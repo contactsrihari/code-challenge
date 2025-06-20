@@ -1,3 +1,12 @@
+if (oSession.oRequest.headers.ExistsAndContains("Proxy-Authorization", ""))
+{
+    // Already authorized
+    return;
+}
+oSession["X-OverrideGateway"] = "http://yourproxy:port";
+oSession["X-ProxyUser"] = "DOMAIN\\username";
+oSession["X-ProxyPassword"] = "password";
+
 
 String query = "[key.tck == #tck && key.market == #market && key.marketSectorDescription == #marketSector]";
 Map<String, Object> variables = new HashMap<>();
