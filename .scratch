@@ -1,3 +1,4 @@
+CHG0000345615
 netsh winhttp show proxy
 etsh winhttp reset proxy
 netsh winhttp set proxy 127.0.0.1:8888
