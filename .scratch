@@ -1,4 +1,13 @@
-CHG0000345615
+VENYUAT1_oraas-ny-p023-3 (
+VENYUATI_oraas-ny-p04-02 (
+VENYUAT2_oraas-ny-p023-1 (
+VENYUAT2_oraas-ny-p04-05 (
+VENYUAT_oraasnyp023(RAC)
+VENYUAT oraasnyp04(RAC)
+
+
+
+OCHG0000345615
 netsh winhttp show proxy
 etsh winhttp reset proxy
 netsh winhttp set proxy 127.0.0.1:8888
