@@ -1,21 +1,4 @@
-VENYUAT1_oraas-ny-p023-3 (
-VENYUATI_oraas-ny-p04-02 (
-VENYUAT2_oraas-ny-p023-1 (
-VENYUAT2_oraas-ny-p04-05 (
-VENYUAT_oraasnyp023(RAC)
-VENYUAT oraasnyp04(RAC)
-
-
-
-OCHG0000345615
-netsh winhttp show proxy
-etsh winhttp reset proxy
-netsh winhttp set proxy 127.0.0.1:8888
-fiddler.exe /upstreamproxy:"http=euwebproxy.wlb.eur.nsroot.net:80"
-
-
-FiddlerApplication.oProxy.UpstreamGateway = new Proxy("http=euwebproxy.wlb.eur.nsroot.net:80");
-FiddlerApplication.oProxy.UpstreamGateway.Credentials = new System.Net.NetworkCredential("sk38994", "xxx", "");  // Or add domain if needed
+/TD/1696/Container/7116c0ad2ab981c3755b0d150f658768/
 
 if (oSession.oRequest.headers.ExistsAndContains("Proxy-Authorization", ""))
 {
