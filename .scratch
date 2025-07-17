@@ -1,3 +1,5 @@
+https://Inyrafreapsu.nam.nsroot.net:8544/simpleconfig/public/tdmetadata
+
 /TD/1696/Container/7116c0ad2ab981c3755b0d150f658768/
 
 if (oSession.oRequest.headers.ExistsAndContains("Proxy-Authorization", ""))
