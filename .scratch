@@ -1,3 +1,4 @@
+jcmd <PID> GC.heap_dump /tmp/heapdump.hprof
 jmap -dump:format=b,file=/tmp/myapp-heap.hprof 12345
 ps -eo rss= | awk '{sum+=$1} END {print sum/1024 " MB"}'
 
