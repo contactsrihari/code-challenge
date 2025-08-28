@@ -1,3 +1,5 @@
+find /var/opt/MKV/TDLiberatorlnx -type f -name "session-rttpd.*" -mmin -60 -exec sh -c 'gunzip -c "$1" | awk "{print \$5}"' sh {} \; | sort | uniq -c | sort -nr
+
 we have a java based streaming applications acts as datasources connected to Caplin Liberator streaming middleware, where datasources connects to other end with ION MKV and a remote application based on remote discovery service through socket connection
 
 we are looking to build a load testing framework to capture the high water mark throughput metrics to measure system capacity. system design should have common interface for datasource component with configurable parameters, what is the best way to build such flexible test framework application
