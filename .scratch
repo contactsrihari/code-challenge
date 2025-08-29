@@ -1,3 +1,8 @@
+find /var/opt/MKV/TDLiberatorlnx -type f -name "session-rttpd.*" -newermt "2025-08-28 00:00" ! -newermt "2025-08-29 00:00" -exec sh -c '
+  echo "File: $1"
+  gunzip -c "$1" | awk "{print \$5}" | sort | uniq -c | sort -nr
+' sh {} \;
+
 generate java springboot application for jdk17 based on gradle8  build including application config, rest controller with complete swagger interface to invoke rest endpoints. resst controller method should be POST method accept an array of objects in the body and method should take each object and call a downstream rest endpoint and capture output. generate maximum possible details working code out of box. using the package prefix com.citi.td.capacity.test with appropriate suffix package names according to code layer. also provide command line instructions to launch on linux along with build and package instructions
 
 find /var/opt/MKV/TDLiberatorlnx -type f -name "session-rttpd.*" -mmin -60 -exec sh -c 'gunzip -c "$1" | awk "{print \$5}"' sh {} \; | sort | uniq -c | sort -nr
