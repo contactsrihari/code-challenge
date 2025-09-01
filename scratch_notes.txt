@@ -34,7 +34,6 @@ repositories {
 }
 
 
-./gradlew test --tests "com.citi.connectivity.datamodel.TestTrade" \
   --no-daemon \
   -Dorg.gradle.jvmargs="--add-opens java.base/java.lang=ALL-UNNAMED"
 
