@@ -1,3 +1,17 @@
+
+withCredentials([
+    usernamePassword(
+        credentialsId: 'artifactory-creds',
+        usernameVariable: 'aUsername',
+        passwordVariable: 'aPassword'
+    )
+]) {
+    sh '''
+        echo "USERNAME is set? " $aUsername
+        echo "PASSWORD length: ${#aPassword}"
+        ./gradlew build --info
+    '''
+}
 -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
 
 # Create a list of symlink targets in the same directory
